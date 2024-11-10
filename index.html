@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Reset and basic styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            padding: 20px;
+        }
+
+        /* Header Navigation */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .header .nav {
+            display: flex;
+            gap: 20px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .header .nav a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .header .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+            justify-content: center;
+            align-items: right;
+        }
+
+        .dashboard-item {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .dashboard-item h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .chart-container {
+            height: 400px;
+        }
+
+        /* Small widgets and chart sections */
+        .small-widgets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .widget {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.1em;
+            padding: 10px;
+        }
+
+        /* Styled Table for MySQL Data */
+        .dashboard-item table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .dashboard-item table th, .dashboard-item table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dashboard-item table th {
+            background-color: #f4f6f8;
+            font-weight: bold;
+        }
+
+        /* Add custom icons */
+        .widget-icon {
+            font-size: 2em;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+   
+    <div class="header">
+        <div class="nav">
+            <a href="#">Dashboard</a>
+            <a href="#">Statistics</a>
+            <a href="#">Balances</a>
+            <a href="#">Reports</a>
+            <a href="#">Schedule</a>
+        </div>
+        <div class="profile">
+            <span>🔔 </span>
+            <span></span>
+        </div>
+    </div>
+
+    
+    <div class="dashboard-container">
+        
+        
+        <div class="dashboard-item">
+            <h2>Summary</h2>
+            <div class="chart-container">
+                <canvas id="summaryPieChart"></canvas>
+            </div>
+        </div>
+
+       
+        <div class="dashboard-item">
+            <h2>Sales</h2>
+            <div class="chart-container">
+                <canvas id="salesLineChart"></canvas>
+            </div>
+        </div>
+
+        
+        <div class="dashboard-item small-widgets">
+            <div class="widget">
+                <span class="widget-icon">₹</span>
+                <p>Repayments</p>
+                <span>₹24,17,000</span>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">₹</span>
+                <p>Ads Expense</p>
+                <span>₹18,72,000</span>
+            </div>
+        </div>
+
+        
+        <div class="dashboard-item small-widgets">
+            <div class="widget">
+                <span class="widget-icon">📦</span>
+                <p>Inventory Sales</p>
+                <span>₹1.74CR</span>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">🚚</span>
+                <p>Deliveries Made</p>
+                <span>4,591</span>
+            </div>
+        </div>
+
+        <div class="dashboard-item">
+            <h2>Monthly Sales </h2>
+            <table>
+                <tr>
+                    <th>Month</th>
+                    <th>Sales (₹)</th>
+                </tr>
+                {% for record in sales_data %}
+                <tr>
+                    <td>{{ record.month }}</td>
+                    <td>{{ record.sales }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        
+        <div class="dashboard-item">
+            <h2>Monthly Sales Distribution</h2>
+            <img src="{% url 'sales_histogram' %}" alt="Sales Histogram">
+        </div>
+        </div>
+    </div>
+
+   
+    <script>
+        
+
+        
+        const summaryPieChartCtx = document.getElementById('summaryPieChart').getContext('2d');
+        new Chart(summaryPieChartCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Variant 1', 'Variant 2', 'Variant 3', 'Variant 4'],
+                datasets: [{
+                    data: [72, 18, 4, 6],
+                    backgroundColor: ['#FFD700', '#FFFFFF', '#D3D3D3', '#F5DEB3']
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        
+        const salesLineChartCtx = document.getElementById('salesLineChart').getContext('2d');
+        new Chart(salesLineChartCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Sales',
+                    data: [1.5, 2.5, 1.8, 2.2, 2.4, 1.9, 1.5, 2.5, 1.8, 2.2, 2.4, 1.9],
+                    borderColor: '#FFD700',
+                    fill: true,
+                    backgroundColor: 'rgba(255, 215, 0, 0.2)'
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+      
+        
+    </script>
+</body>
+</html> 
